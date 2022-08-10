@@ -3,6 +3,7 @@ package mongotools
 import (
 	"context"
 	"encoding/json"
+	"regexp"
 	"strings"
 
 	"github.com/shenguanjiejie/go-tools"
@@ -34,13 +35,49 @@ func LogCursor(cursor *mongo.Cursor) error {
 		tools.Slogln(err)
 		return err
 	}
-	jsonPipe, err := json.MarshalIndent(results, "", "    ")
+
+	err = logResult(results)
 	if err != nil {
 		tools.Slogln(err)
 		return err
 	}
 
-	tools.Slogln(string(jsonPipe))
+	return nil
+}
+
+// LogSingleResult 打印SingleResult信息
+func LogSingleResult(cursor *mongo.SingleResult) error {
+	var result interface{}
+	err := cursor.Decode(&result)
+	if err != nil {
+		tools.Slogln(err)
+		return err
+	}
+
+	err = logResult(result)
+	if err != nil {
+		tools.Slogln(err)
+		return err
+	}
+
+	return nil
+}
+
+func logResult(result any) error {
+	if result == nil {
+		tools.Slogln("")
+	}
+
+	jsonB, err := json.MarshalIndent(result, "", "    ")
+	if err != nil {
+		tools.Slogln(err)
+		return err
+	}
+
+	reg := regexp.MustCompile(`\{\n\s+"Key":(.+?),\n\s+"Value":(.+?)\n\s+\}`)
+	jsonB = reg.ReplaceAll(jsonB, []byte("$1:$2"))
+
+	tools.Slogln(string(jsonB))
 	return nil
 }
 
@@ -55,7 +92,7 @@ func MongoClient(URI string) (*mongo.Client, error) {
 		return nil, err
 	}
 	if err = client.Ping(context.Background(), readpref.Primary()); err != nil {
-		tools.Slogln("mongo ping err:%s", err.Error())
+		tools.Slogln("mongo ping err", err)
 		return nil, err
 	}
 
