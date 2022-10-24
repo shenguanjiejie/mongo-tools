@@ -3,7 +3,7 @@ module github.com/shenguanjiejie/mongo-tools
 go 1.18
 
 require (
-	github.com/shenguanjiejie/go-tools v0.0.4
+	github.com/shenguanjiejie/go-tools v1.1.0
 	go.mongodb.org/mongo-driver v1.9.1
 )
 

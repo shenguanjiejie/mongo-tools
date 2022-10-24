@@ -32,13 +32,13 @@ func LogCursor(cursor *mongo.Cursor) error {
 	var results []interface{}
 	err := cursor.All(context.Background(), &results)
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return err
 	}
 
 	err = logResult(results)
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return err
 	}
 
@@ -50,13 +50,13 @@ func LogSingleResult(cursor *mongo.SingleResult) error {
 	var result interface{}
 	err := cursor.Decode(&result)
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return err
 	}
 
 	err = logResult(result)
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return err
 	}
 
@@ -65,19 +65,19 @@ func LogSingleResult(cursor *mongo.SingleResult) error {
 
 func logResult(result any) error {
 	if result == nil {
-		tools.Slogln("")
+		tools.Logln("")
 	}
 
 	jsonB, err := json.MarshalIndent(result, "", "    ")
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return err
 	}
 
 	reg := regexp.MustCompile(`\{\n\s+"Key":(.+?),\n\s+"Value":(.+?)\n\s+\}`)
 	jsonB = reg.ReplaceAll(jsonB, []byte("$1:$2"))
 
-	tools.Slogln(string(jsonB))
+	tools.Logln(string(jsonB))
 	return nil
 }
 
@@ -88,11 +88,11 @@ func MongoClient(URI string) (*mongo.Client, error) {
 	// Connect to MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
-		tools.Slogln(err)
+		tools.Logln(err)
 		return nil, err
 	}
 	if err = client.Ping(context.Background(), readpref.Primary()); err != nil {
-		tools.Slogln("mongo ping err", err)
+		tools.Logln("mongo ping err", err)
 		return nil, err
 	}
 
